@@ -228,6 +228,7 @@ class Parser(object):
         self.add_simple_formatter("hr", "<hr />", standalone=True)
         self.add_simple_formatter("sub", "<sub>%(value)s</sub>")
         self.add_simple_formatter("sup", "<sup>%(value)s</sup>")
+        self.add_simple_formatter("c", "%(value)s")
 
         def _render_list(name, value, options, parent, context):
             list_type = options["list"] if (options and "list" in options) else "*"
@@ -268,6 +269,7 @@ class Parser(object):
             replace_cosmetic=False,
         )
         self.add_simple_formatter("center", '<div style="text-align:center;">%(value)s</div>')
+        self.add_simple_formatter("size", "%(value)s", strip=True)
 
         def _render_color(name, value, options, parent, context):
             if "color" in options:
@@ -283,7 +285,33 @@ class Parser(object):
                 "value": value,
             }
 
+        def _render_bgcolor(name, value, options, parent, context):
+            if "bgcolor" in options:
+                color = options["bgcolor"].strip()
+            elif options:
+                color = list(options.keys())[0].strip()
+            else:
+                return value
+            match = re.match(r"^([a-z]+)|^(#[a-f0-9]{3,6})", color, re.I)
+            color = match.group() if match else "inherit"
+            return '<span style="background-color:%(bgcolor)s;">%(value)s</span>' % {
+                "bgcolor": color,
+                "value": value,
+            }
+
+        def _render_thing(name, value, options, parent, context):
+            if "thing" in options:
+                thing = options["thing"].strip()
+            else:
+                return value
+            return '<a href="https://www.boardgamegeek.com/boardgame/%(thing)s">%(value)s</a>' % {
+                "thing": thing,
+                "value": value,
+            }
+
         self.add_formatter("color", _render_color)
+        self.add_formatter("bgcolor", _render_bgcolor)
+        self.add_formatter("thing", _render_thing)
 
         def _render_url(name, value, options, parent, context):
             if options and "url" in options:
