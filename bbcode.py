@@ -141,6 +141,9 @@ class Parser(object):
         ("(c)", "&copy;"),
         ("(reg)", "&reg;"),
         ("(tm)", "&trade;"),
+        (':star:', '&#11088;'),
+        (':nostar:', '&#9734;'),
+        (':arrowE:', ''),
     )
 
     def __init__(
